@@ -198,19 +198,24 @@ def get_remote_version() -> Optional[str]:
     except:
         return None
 
-def check_for_update() -> bool:
-    """检查是否有更新"""
-    remote_version = get_remote_version()
-    if remote_version and remote_version != VERSION:
-        return True
-    return False
-
-def update_script_from_github() -> bool:
+def update_from_github() -> bool:
     """从 GitHub 更新脚本"""
     try:
         import urllib.request
         
-        print_info(f"正在下载最新版本...")
+        print_info("正在检查更新...")
+        
+        # 检查远程版本
+        remote_version = get_remote_version()
+        if not remote_version:
+            print_error("无法获取远程版本信息")
+            return False
+        
+        if remote_version == VERSION:
+            print_info(f"当前已是最新版本 v{VERSION}")
+            return False
+        
+        print_info(f"发现新版本: v{remote_version}，正在下载...")
         
         # 下载新版本
         req = urllib.request.Request(RAW_URL, headers={'User-Agent': 'hermes-cli'})
@@ -220,7 +225,7 @@ def update_script_from_github() -> bool:
         # 备份当前版本
         backup_path = SCRIPT_PATH.with_suffix('.py.bak')
         shutil.copy2(SCRIPT_PATH, backup_path)
-        print_info(f"已备份当前版本到: {backup_path}")
+        print_info(f"已备份当前版本")
         
         # 写入新版本
         with open(SCRIPT_PATH, 'w', encoding='utf-8') as f:
@@ -229,118 +234,49 @@ def update_script_from_github() -> bool:
         # 设置执行权限
         SCRIPT_PATH.chmod(0o755)
         
-        return True
-    except Exception as e:
-        print_error(f"更新失败: {e}")
-        return False
-
-def update_script_from_local(source_path: str) -> bool:
-    """从本地文件更新脚本"""
-    try:
-        source = Path(source_path).resolve()
-        if not source.exists():
-            print_error(f"源文件不存在: {source_path}")
-            return False
-        
-        # 备份当前版本
-        backup_path = SCRIPT_PATH.with_suffix('.py.bak')
-        shutil.copy2(SCRIPT_PATH, backup_path)
-        print_info(f"已备份当前版本到: {backup_path}")
-        
-        # 复制新版本
-        shutil.copy2(source, SCRIPT_PATH)
-        
-        # 设置执行权限
-        SCRIPT_PATH.chmod(0o755)
-        
+        print_success(f"更新成功！v{VERSION} -> v{remote_version}")
+        print_info("请重新运行脚本以使用新版本")
         return True
     except Exception as e:
         print_error(f"更新失败: {e}")
         return False
 
 def self_update():
-    """自更新菜单"""
-    while True:
-        clear_screen()
-        print_header("脚本更新", show_ascii=True)
-        print_separator()
-        
-        print(f"\n      当前版本: {Colors.WHITE}v{VERSION}{Colors.RESET}")
-        print(f"      脚本路径: {SCRIPT_PATH}")
-        
-        # 检查远程版本
-        remote_version = get_remote_version()
-        if remote_version:
-            if remote_version != VERSION:
-                print(f"      远程版本: {Colors.GREEN}v{remote_version} (有更新){Colors.RESET}")
-            else:
-                print(f"      远程版本: {Colors.GREEN}v{remote_version} (已是最新){Colors.RESET}")
+    """脚本更新"""
+    clear_screen()
+    print_header("脚本更新", show_ascii=True)
+    print_separator()
+    
+    # 显示版本信息
+    print(f"\n      当前版本: {Colors.WHITE}v{VERSION}{Colors.RESET}")
+    print(f"      脚本路径: {SCRIPT_PATH}")
+    
+    # 检查远程版本
+    remote_version = get_remote_version()
+    if remote_version:
+        if remote_version != VERSION:
+            print(f"      远程版本: {Colors.GREEN}v{remote_version} (有更新){Colors.RESET}")
         else:
-            print(f"      远程版本: {Colors.GRAY}无法获取{Colors.RESET}")
-        
-        print_separator()
-        
-        print_single_column("操作选项", [
-            "从 GitHub 更新",
-            "从本地文件更新",
-            "检查更新",
-            "恢复备份"
-        ])
-        print_separator()
-        print("       0. 返回主菜单")
-        print_separator()
-        
-        choice = get_input("请选择 [0-4]", (0, 4))
-        
-        if choice == 'back':
-            break
-        elif choice == 'quit':
-            sys.exit(0)
-        elif choice == '1':
-            # 从 GitHub 更新
-            print_warning("确定要从 GitHub 更新吗？(y/n)")
-            confirm = input("      确认: ").strip().lower()
-            if confirm == 'y':
-                if update_script_from_github():
-                    print_success("更新成功！请重新运行脚本。")
-                    sys.exit(0)
-                else:
-                    print_error("更新失败")
-            prompt_continue()
-        elif choice == '2':
-            # 从本地文件更新
-            source = input("      输入源文件路径: ").strip()
-            if source:
-                print_warning("确定要从本地文件更新吗？(y/n)")
-                confirm = input("      确认: ").strip().lower()
-                if confirm == 'y':
-                    if update_script_from_local(source):
-                        print_success("更新成功！请重新运行脚本。")
-                        sys.exit(0)
-                    else:
-                        print_error("更新失败")
-            prompt_continue()
-        elif choice == '3':
-            # 检查更新
-            if check_for_update():
-                print_success(f"发现新版本: v{remote_version}")
-            else:
-                print_info("当前已是最新版本")
-            prompt_continue()
-        elif choice == '4':
-            # 恢复备份
-            backup_path = SCRIPT_PATH.with_suffix('.py.bak')
-            if backup_path.exists():
-                print_warning("确定要恢复备份吗？(y/n)")
-                confirm = input("      确认: ").strip().lower()
-                if confirm == 'y':
-                    shutil.copy2(backup_path, SCRIPT_PATH)
-                    SCRIPT_PATH.chmod(0o755)
-                    print_success("恢复成功！请重新运行脚本。")
-                    sys.exit(0)
-            else:
-                print_error("没有找到备份文件")
-            prompt_continue()
+            print(f"      远程版本: {Colors.GREEN}v{remote_version} (已是最新){Colors.RESET}")
+    else:
+        print(f"      远程版本: {Colors.GRAY}无法获取{Colors.RESET}")
+    
+    print_separator()
+    
+    # 检查是否有更新
+    if not remote_version or remote_version == VERSION:
+        print_info("当前已是最新版本，无需更新")
+        prompt_continue()
+        return
+    
+    # 确认更新
+    print_warning(f"发现新版本 v{remote_version}，是否更新？")
+    confirm = input("      输入 y 确认更新: ").strip().lower()
+    
+    if confirm == 'y':
+        update_from_github()
+    
+    prompt_continue()
 
 # === UI 组件 ===
 
