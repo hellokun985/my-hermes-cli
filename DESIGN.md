@@ -6,18 +6,27 @@
 **语言**: Python 3.9+
 **依赖**: 仅使用 Python 标准库
 **用途**: Hermes Agent 一站式安装与管理工具
-**版本**: v1.0
+**版本**: v1.4
 **更新日期**: 2026-05-29
 **启动命令**: `hc`
+**仓库地址**: https://github.com/hellokun985/my-hermes-cli
 
 ### 1.1 启动配置
 
 **命令**: `hc`（Hermes CLI 缩写）
 
-**安装方式**: 符号链接
+**一键安装**:
 ```bash
-# 脚本安装时自动创建
-sudo ln -sf /path/to/hermes_cli.py /usr/local/bin/hc
+curl -fsSL https://raw.githubusercontent.com/hellokun985/my-hermes-cli/main/install.sh | bash
+```
+
+**手动安装**:
+```bash
+# 下载脚本
+curl -fsSL https://raw.githubusercontent.com/hellokun985/my-hermes-cli/main/hermes_cli.py -o /tmp/hermes_cli.py
+
+# 安装到 /usr/local/bin
+sudo cp /tmp/hermes_cli.py /usr/local/bin/hc
 sudo chmod +x /usr/local/bin/hc
 ```
 
@@ -1060,6 +1069,10 @@ HERMESCLI_ASCII = """
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
 | v1.0 | 2026-05-29 | 初始版本，包含 30 个功能模块 |
+| v1.1 | 2026-05-29 | 添加自更新功能，使用 GitHub API |
+| v1.2 | 2026-05-29 | 修复双列对齐问题：计算中文字符实际宽度 |
+| v1.3 | 2026-05-29 | 修复更新权限问题：使用 sudo 更新脚本 |
+| v1.4 | 2026-05-29 | 修复终端类型错误，统一右列颜色 |
 
 ## 10. 参考资源
 
@@ -1067,3 +1080,4 @@ HERMESCLI_ASCII = """
 - [Hermes Agent 文档](https://hermes-agent.nousresearch.com/docs/)
 - [CLI 命令参考](https://hermes-agent.nousresearch.com/docs/reference/cli-commands)
 - [Skills Hub](https://agentskills.io)
+- [Hermes CLI 仓库](https://github.com/hellokun985/my-hermes-cli)
