@@ -188,25 +188,53 @@ def get_input(prompt: str = "请选择", valid_range: tuple = None) -> str:
 # === 自更新功能 ===
 
 def get_remote_version() -> Optional[str]:
-    """获取远程版本号"""
+    """获取远程版本号（使用 GitHub API 避免 CDN 缓存）"""
     try:
         import urllib.request
-        version_url = f"https://raw.githubusercontent.com/hellokun985/my-hermes-cli/main/VERSION"
-        req = urllib.request.Request(version_url, headers={'User-Agent': 'hermes-cli'})
+        import base64
+        import json
+        
+        # 使用 GitHub API 获取最新版本
+        api_url = "https://api.github.com/repos/hellokun985/my-hermes-cli/contents/VERSION"
+        req = urllib.request.Request(api_url, headers={'User-Agent': 'hermes-cli'})
         with urllib.request.urlopen(req, timeout=10) as response:
-            return response.read().decode('utf-8').strip()
+            data = json.loads(response.read().decode('utf-8'))
+            version = base64.b64decode(data['content']).decode('utf-8').strip()
+            return version
     except:
-        return None
+        # 如果 API 失败，尝试使用 raw URL
+        try:
+            import urllib.request
+            version_url = f"https://raw.githubusercontent.com/hellokun985/my-hermes-cli/main/VERSION"
+            req = urllib.request.Request(version_url, headers={'User-Agent': 'hermes-cli'})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                return response.read().decode('utf-8').strip()
+        except:
+            return None
 
 def update_from_github() -> bool:
-    """从 GitHub 更新脚本"""
+    """从 GitHub 更新脚本（使用 API 避免 CDN 缓存）"""
     try:
         import urllib.request
+        import base64
+        import json
         
         print_info("正在检查更新...")
         
-        # 检查远程版本
-        remote_version = get_remote_version()
+        # 使用 GitHub API 获取最新版本
+        api_url = "https://api.github.com/repos/hellokun985/my-hermes-cli/contents/hermes_cli.py"
+        req = urllib.request.Request(api_url, headers={'User-Agent': 'hermes-cli'})
+        with urllib.request.urlopen(req, timeout=30) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            new_content = base64.b64decode(data['content']).decode('utf-8')
+        
+        # 从下载内容中提取版本号
+        remote_version = None
+        for line in new_content.split('\n'):
+            if line.startswith('VERSION'):
+                remote_version = line.split('"')[1]
+                break
+        
         if not remote_version:
             print_error("无法获取远程版本信息")
             return False
@@ -216,11 +244,6 @@ def update_from_github() -> bool:
             return False
         
         print_info(f"发现新版本: v{remote_version}，正在下载...")
-        
-        # 下载新版本
-        req = urllib.request.Request(RAW_URL, headers={'User-Agent': 'hermes-cli'})
-        with urllib.request.urlopen(req, timeout=30) as response:
-            new_content = response.read().decode('utf-8')
         
         # 备份当前版本
         backup_path = SCRIPT_PATH.with_suffix('.py.bak')
