@@ -250,16 +250,20 @@ def update_from_github() -> bool:
         with open(temp_file, 'w', encoding='utf-8') as f:
             f.write(new_content)
         
+        # 获取脚本路径（字符串格式）
+        script_path = str(SCRIPT_PATH)
+        backup_path = script_path + ".bak"
+        
         # 使用 sudo 备份并更新
-        backup_path = str(SCRIPT_PATH) + ".bak"
-        subprocess.run(["sudo", "cp", str(SCRIPT_PATH), backup_path], check=True)
+        subprocess.run(["sudo", "cp", script_path, backup_path], check=True)
         print_info(f"已备份当前版本")
         
-        subprocess.run(["sudo", "cp", temp_file, str(SCRIPT_PATH)], check=True)
-        subprocess.run(["sudo", "chmod", "+x", str(SCRIPT_PATH)], check=True)
+        subprocess.run(["sudo", "cp", temp_file, script_path], check=True)
+        subprocess.run(["sudo", "chmod", "+x", script_path], check=True)
         
         # 清理临时文件
-        os.remove(temp_file)
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
         
         print_success(f"更新成功！v{VERSION} -> v{remote_version}")
         print_info("请重新运行脚本以使用新版本")
