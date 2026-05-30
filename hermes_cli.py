@@ -323,6 +323,26 @@ def print_separator():
     """打印分隔线"""
     print(f"\n    {Colors.GRAY}{'─' * 70}{Colors.RESET}")
 
+def get_display_width(text: str) -> int:
+    """计算字符串的实际显示宽度（中文占2个宽度，英文占1个宽度）"""
+    width = 0
+    for char in text:
+        if '\u4e00' <= char <= '\u9fff':  # 中文字符
+            width += 2
+        elif '\u3000' <= char <= '\u303f':  # 中文标点
+            width += 2
+        elif '\uff00' <= char <= '\uffef':  # 全角字符
+            width += 2
+        else:
+            width += 1
+    return width
+
+def pad_to_width(text: str, target_width: int) -> str:
+    """填充字符串到目标显示宽度"""
+    current_width = get_display_width(text)
+    padding = target_width - current_width
+    return text + ' ' * max(0, padding)
+
 def print_section_header(icon: str, title: str):
     """打印版块标题"""
     print(f"\n    {Colors.CYAN}{icon} {title}{Colors.RESET}")
@@ -346,8 +366,19 @@ def print_two_columns(left_title: str, left_items: list,
         right_num = right_start + i if i < len(right_items) else ""
         right_name = right_items[i] if i < len(right_items) else ""
         
-        left_part = f"{left_num:>2}. {left_name:<30}" if left_name else " " * 34
-        right_part = f"{right_num:>2}. {right_name}" if right_name else ""
+        # 构建左列
+        if left_name:
+            left_text = f"{left_num:>2}. {left_name}"
+            left_part = pad_to_width(left_text, 34)
+        else:
+            left_part = " " * 34
+        
+        # 构建右列
+        if right_name:
+            right_part = f"{right_num:>2}. {right_name}"
+        else:
+            right_part = ""
+        
         print(f"      {Colors.WHITE}{left_part}{Colors.RESET}{right_part}")
 
 def print_single_column(title: str, items: list, start_num: int = 1, icon: str = "▸"):
