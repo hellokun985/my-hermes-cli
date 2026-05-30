@@ -12,6 +12,10 @@ import shutil
 from pathlib import Path
 from typing import Optional, Tuple, List
 
+# === 设置终端类型（避免 xterm-ghostty 错误）===
+if os.environ.get('TERM') not in ('xterm', 'xterm-256color', 'linux', 'screen', 'tmux'):
+    os.environ['TERM'] = 'xterm-256color'
+
 # === 版本信息 ===
 VERSION = "1.4"
 SCRIPT_NAME = "hermes_cli.py"
