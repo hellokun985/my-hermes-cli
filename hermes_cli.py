@@ -391,7 +391,7 @@ def print_two_columns(left_title: str, left_items: list,
         else:
             right_part = ""
         
-        print(f"      {Colors.WHITE}{left_part}{Colors.RESET}{right_part}")
+        print(f"      {Colors.WHITE}{left_part}{Colors.WHITE}{right_part}{Colors.RESET}")
 
 def print_single_column(title: str, items: list, start_num: int = 1, icon: str = "▸"):
     """打印单列菜单"""
