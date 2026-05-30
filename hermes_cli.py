@@ -245,17 +245,21 @@ def update_from_github() -> bool:
         
         print_info(f"发现新版本: v{remote_version}，正在下载...")
         
-        # 备份当前版本
-        backup_path = SCRIPT_PATH.with_suffix('.py.bak')
-        shutil.copy2(SCRIPT_PATH, backup_path)
-        print_info(f"已备份当前版本")
-        
-        # 写入新版本
-        with open(SCRIPT_PATH, 'w', encoding='utf-8') as f:
+        # 写入临时文件
+        temp_file = "/tmp/hermes_cli_update.py"
+        with open(temp_file, 'w', encoding='utf-8') as f:
             f.write(new_content)
         
-        # 设置执行权限
-        SCRIPT_PATH.chmod(0o755)
+        # 使用 sudo 备份并更新
+        backup_path = str(SCRIPT_PATH) + ".bak"
+        subprocess.run(["sudo", "cp", str(SCRIPT_PATH), backup_path], check=True)
+        print_info(f"已备份当前版本")
+        
+        subprocess.run(["sudo", "cp", temp_file, str(SCRIPT_PATH)], check=True)
+        subprocess.run(["sudo", "chmod", "+x", str(SCRIPT_PATH)], check=True)
+        
+        # 清理临时文件
+        os.remove(temp_file)
         
         print_success(f"更新成功！v{VERSION} -> v{remote_version}")
         print_info("请重新运行脚本以使用新版本")
