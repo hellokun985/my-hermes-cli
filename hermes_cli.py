@@ -316,7 +316,8 @@ def print_status():
     version = get_version()
     status_color = Colors.GREEN if status == "运行中" else Colors.RED
     print(f"\n      运行状态: [{status_color}{status}{Colors.RESET}]    当前版本: {version}")
-    print(f"      安装路径: {HERMES_HOME}")
+    print(f"      Hermes 目录: {HERMES_HOME}")
+    print(f"      脚本路径: {SCRIPT_PATH}")
 
 def print_separator():
     """打印分隔线"""
