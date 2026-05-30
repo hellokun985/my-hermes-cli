@@ -15,8 +15,8 @@ from typing import Optional, Tuple, List
 # === 版本信息 ===
 VERSION = "1.0"
 SCRIPT_NAME = "hermes_cli.py"
-GITHUB_REPO = "https://github.com/your-username/my-hermes-cli"  # 替换为实际仓库地址
-RAW_URL = f"https://raw.githubusercontent.com/your-username/my-hermes-cli/main/{SCRIPT_NAME}"
+GITHUB_REPO = "https://github.com/kunkunabc/my-hermes-cli"
+RAW_URL = f"https://raw.githubusercontent.com/kunkunabc/my-hermes-cli/main/{SCRIPT_NAME}"
 
 # === 路径常量 ===
 HERMES_HOME = Path.home() / ".hermes"
@@ -191,7 +191,7 @@ def get_remote_version() -> Optional[str]:
     """获取远程版本号"""
     try:
         import urllib.request
-        version_url = f"https://raw.githubusercontent.com/your-username/my-hermes-cli/main/VERSION"
+        version_url = f"https://raw.githubusercontent.com/kunkunabc/my-hermes-cli/main/VERSION"
         req = urllib.request.Request(version_url, headers={'User-Agent': 'hermes-cli'})
         with urllib.request.urlopen(req, timeout=10) as response:
             return response.read().decode('utf-8').strip()
