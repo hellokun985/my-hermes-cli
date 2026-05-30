@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Optional, Tuple, List
 
 # === 版本信息 ===
-VERSION = "1.2"
+VERSION = "1.3"
 SCRIPT_NAME = "hermes_cli.py"
 GITHUB_REPO = "https://github.com/hellokun985/my-hermes-cli"
 RAW_URL = f"https://raw.githubusercontent.com/hellokun985/my-hermes-cli/main/{SCRIPT_NAME}"
